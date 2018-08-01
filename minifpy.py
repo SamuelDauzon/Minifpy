@@ -254,7 +254,7 @@ def manage_minify_all_file_project(settings):
             merge_minify_file_settings(settings_merge_file)
 
 def minify_file(file_path):
-    if get_extension(args.file_path) == ".js":
+    if get_extension(file_path) == ".js":
         minify_js_file(minify_js, file_path, file_path[:-3]+".min.js")
 
 def manage_file_changes(file_path, settings):
@@ -272,9 +272,12 @@ def check_errors():
 
 def get_settings():
     settings = None
-    with open(os.path.join(CURRENT_FILE_DIR, 'minifpy_settings.json'), 'r') as f:
-        settings_json = f.read()
-        settings = ast.literal_eval(settings_json)
+    try:
+        with open(os.path.join(CURRENT_FILE_DIR, 'minifpy_settings.json'), 'r') as f:
+            settings_json = f.read()
+            settings = ast.literal_eval(settings_json)
+    except FileNotFoundError:
+        pass
     return settings
 
 if __name__ == '__main__':
@@ -290,7 +293,7 @@ if __name__ == '__main__':
         class AutoRunHandler(FileSystemEventHandler):
             def on_modified(self, event):
                 print("file %s modified" % event.src_path)
-                if get_extension(event.src_path):
+                if get_extension(event.src_path) and ".min." not in event.src_path:
                     settings = get_settings()
                     manage_file_changes(event.src_path, settings)
 
