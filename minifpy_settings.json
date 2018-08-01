@@ -1,0 +1,7 @@
+{
+    "js": {
+        "minify_files": [
+            {"from": "test.js", "to":"test.min.js"},
+        ]
+    }
+}
