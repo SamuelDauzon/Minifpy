@@ -63,7 +63,6 @@ monitor modifications in project and merge and minify files in accordance with *
 The *minifpy_settings.json* file provide a way to define how Minifpy to merge and minify files. The syntax is the following : 
 
 ```
-
 {
     "js": {
         "minify_files": [
@@ -81,7 +80,8 @@ The *minifpy_settings.json* file provide a way to define how Minifpy to merge an
             {"from" : ["static/css/user_feature.css", "static/css/pricing_feature.css"], "to":"static/css/public.css", "to_min": "static/css/public.min.css"}
         ]
     }
-}```
+}
+```
 
 
 
