@@ -29,15 +29,6 @@ ERROR_LOG_FILE_PATH = os.path.join(CURRENT_FILE_DIR, 'minifpy_error.log')
 if not ENCODING:
     ENCODING = locale.getpreferredencoding()
 
-parser = argparse.ArgumentParser(description="Minifpy to minify and merge JS/CSS files")
-parser.add_argument("-f", "--file_path", help="File to minify", default='')
-parser.add_argument("-p", "--project", action='store_true', help="Minify all project depending on minifpy_settings.json")
-parser.add_argument("-v", "--verbose", action='store_true')
-parser.add_argument("-r", "--auto_reload", action='store_true', help="Daemon to minify for changed file "+watchdog_alert)
-args = parser.parse_args()
-
-if watchdog_alert:
-    args.auto_reload = False
 
 # Exemple minifpy_settings.json
 """
@@ -208,7 +199,7 @@ def merge_minify_file_settings(settings_merge_file):
         print("===== Merge & Minify to file =====")
         print(to_min_file)
     file_path_list = []
-    for file_path in settings_merge_file['from']:
+    for file_path in settings_merge_file['to']:
         file_path_list.append(
             os.path.join(CURRENT_FILE_DIR, get_os_path(file_path))
             )
@@ -228,6 +219,30 @@ def get_settings_file_extension(settings, extension):
             settings_merge_files = extension_settings['merge_files']
 
     return settings_minify_files, settings_merge_files
+
+def get_impacted_file_for_file(file_path, settings=None):
+    impacted_file_list = []
+    if not settings:
+        settings = get_settings()
+    extension = get_extension(file_path)
+    if settings and extension:
+        file_path = get_relative_path_file(file_path)
+        settings_minify_files, settings_merge_files = get_settings_file_extension(settings, extension)
+        
+        for settings_minify_file in settings_minify_files:
+            if settings_minify_file['from'] == file_path:
+                if not settings_minify_file['to'] in impacted_file_list:
+                    impacted_file_list.append(settings_minify_file['to'])
+
+        for settings_merge_file in settings_merge_files:
+            for from_file in settings_merge_file['from']:
+                if from_file == file_path:
+                    if not settings_merge_file['to'] in impacted_file_list:
+                        impacted_file_list.append(settings_merge_file['to'])
+                    if not settings_merge_file['to_min'] in impacted_file_list:
+                        impacted_file_list.append(settings_merge_file['to_min'])
+    return impacted_file_list
+
 
 def manage_minify_file_project(file_path, extension, settings):
     file_path = get_relative_path_file(file_path)
@@ -281,6 +296,17 @@ def get_settings():
     return settings
 
 if __name__ == '__main__':
+
+    parser = argparse.ArgumentParser(description="Minifpy to minify and merge JS/CSS files")
+    parser.add_argument("-f", "--file_path", help="File to minify", default='')
+    parser.add_argument("-p", "--project", action='store_true', help="Minify all project depending on minifpy_settings.json")
+    parser.add_argument("-v", "--verbose", action='store_true')
+    parser.add_argument("-r", "--auto_reload", action='store_true', help="Daemon to minify for changed file "+watchdog_alert)
+    args = parser.parse_args()
+
+    if watchdog_alert:
+        args.auto_reload = False
+
     print(colored_cli.info_str("Minifpy started"))
 
     if os.path.isfile(ERROR_LOG_FILE_PATH):
