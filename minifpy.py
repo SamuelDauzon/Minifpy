@@ -199,7 +199,7 @@ def merge_minify_file_settings(settings_merge_file):
         print("===== Merge & Minify to file =====")
         print(to_min_file)
     file_path_list = []
-    for file_path in settings_merge_file['to']:
+    for file_path in settings_merge_file['from']:
         file_path_list.append(
             os.path.join(CURRENT_FILE_DIR, get_os_path(file_path))
             )
